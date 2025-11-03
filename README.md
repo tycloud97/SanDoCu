@@ -152,12 +152,12 @@ sequenceDiagram
 
 ```mermaid
 graph TD
-  CSV1[facebook_group.csv] --> P[Papaparse]
-  CSV2[facebook_marketplace.csv] --> P
-  CSV3[chotot.csv] --> P
-  P --> N[Chuẩn hoá -> Item]
-  N --> F[Filters + Tabs\n(All/Viewed/Unviewed)]
-  F --> V[Danh sách + Thẻ + Link bài]
+  CSV1["facebook_group.csv"] --> P[Papaparse]
+  CSV2["facebook_marketplace.csv"] --> P
+  CSV3["chotot.csv"] --> P
+  P --> N["Chuẩn hoá → Item"]
+  N --> F["Filters + Tabs<br>(All / Viewed / Unviewed)"]
+  F --> V["Danh sách + Thẻ + Link bài"]
 ```
 
 **Tuỳ biến**
