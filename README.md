@@ -1,4 +1,4 @@
-% Săn Đồ Cũ — Thu thập và xem dữ liệu rao vặt đa nguồn
+# Săn Đồ Cũ — Thu thập và xem dữ liệu rao vặt đa nguồn
 
 Săn Đồ Cũ giúp bạn thu thập (crawl) bài đăng từ nhiều nguồn (Facebook Group, Facebook Marketplace, Chợ Tốt), chuẩn hoá dữ liệu về một định dạng CSV thống nhất, sau đó xem/tra cứu nhanh trên giao diện web.
 
@@ -15,7 +15,51 @@ Săn Đồ Cũ giúp bạn thu thập (crawl) bài đăng từ nhiều nguồn (
   - Lọc theo nguồn
   - Đánh dấu đã xem/chưa xem (lưu trên `localStorage`)
 
+**Sơ đồ tổng quan**
+
+```mermaid
+graph LR
+  A1[Facebook Group] --> C1[FB Group Crawler<br/>(Selenium)]
+  A2[Facebook Marketplace] --> C2[FB Marketplace Crawler<br/>(Playwright)]
+  A3[Chợ Tốt] --> C3[Chợ Tốt Crawler<br/>(Requests + BS4)]
+
+  subgraph Backend
+    C1 --> W[UnifiedCSVWriter\n(de-dup by id, add crawl_time)]
+    C2 --> W
+    C3 --> W
+    W --> F1[frontend/public/data/sources/facebook_group.csv]
+    W --> F2[frontend/public/data/sources/facebook_marketplace.csv]
+    W --> F3[frontend/public/data/sources/chotot.csv]
+  end
+
+  subgraph Frontend
+    F1 -.-> UI[React UI (PapaParse, Filters, Viewed marks)]
+    F2 -.-> UI
+    F3 -.-> UI
+  end
+```
+
 **Kiến trúc & cấu trúc thư mục**
+
+```text
+.
+├─ backend/
+│  ├─ main.py                     # CLI chọn crawler
+│  ├─ facebook_marketplace_crawler.py
+│  ├─ facebook_group_crawler.py
+│  ├─ chotot_crawler.py
+│  ├─ login_and_save_state.py     # Lưu phiên FB -> facebook_state.json
+│  ├─ utils/csv_writer.py         # Writer CSV: append + de-dup + crawl_time
+│  └─ database/
+└─ frontend/
+   ├─ src/                        # React + TS + Tailwind
+   └─ public/
+      └─ data/
+         └─ sources/
+            ├─ facebook_group.csv
+            ├─ facebook_marketplace.csv
+            └─ chotot.csv
+```
 - `backend/`
   - `backend/main.py`: CLI chọn crawler để chạy.
   - `backend/facebook_marketplace_crawler.py`: Crawler Marketplace (Playwright, cần đăng nhập bằng session).
@@ -64,6 +108,31 @@ Săn Đồ Cũ giúp bạn thu thập (crawl) bài đăng từ nhiều nguồn (
   - Dev server: `npm run dev`
   - Build: `npm run build` (đầu ra ở `frontend/dist/`)
 
+**Luồng dữ liệu (một lần chạy crawl)**
+
+```mermaid
+sequenceDiagram
+  participant U as Bạn
+  participant M as backend/main.py
+  participant CR as Crawler
+  participant W as UnifiedCSVWriter
+  participant FS as CSV file
+  participant FE as Frontend (Vite)
+
+  U->>M: python main.py 3 (fb-market)
+  M->>CR: Khởi động crawler
+  CR->>CR: Fetch + parse các item
+  CR->>W: write_if_new(item)
+  alt id mới
+    W->>FS: Append row + crawl_time
+  else id trùng
+    W->>FS: Bỏ qua (skip)
+  end
+  FE->>FS: Tải CSV qua HTTP
+  FE->>FE: Papa.parse -> Item[]
+  FE->>U: Hiển thị + tìm kiếm/lọc/đánh dấu đã xem
+```
+
 **Định dạng dữ liệu CSV**
 - Các cột thống nhất (theo thứ tự):
   - `id` — khoá duy nhất theo từng nguồn (dùng để chống trùng)
@@ -77,7 +146,19 @@ Săn Đồ Cũ giúp bạn thu thập (crawl) bài đăng từ nhiều nguồn (
   - `crawl_time` (ISO, được tự thêm khi ghi)
 - Ghi chú:
   - Writer sẽ tự thêm `crawl_time` cho bản ghi mới. Nếu file cũ chưa có cột này, writer sẽ nâng cấp header tự động.
-  - `write_if_new()` đảm bảo không ghi trùng dựa trên trường `id`.
+- `write_if_new()` đảm bảo không ghi trùng dựa trên trường `id`.
+
+**Frontend: đường đi dữ liệu**
+
+```mermaid
+graph TD
+  CSV1[facebook_group.csv] --> P[Papaparse]
+  CSV2[facebook_marketplace.csv] --> P
+  CSV3[chotot.csv] --> P
+  P --> N[Chuẩn hoá -> Item]
+  N --> F[Filters + Tabs\n(All/Viewed/Unviewed)]
+  F --> V[Danh sách + Thẻ + Link bài]
+```
 
 **Tuỳ biến**
 - Facebook Marketplace: chỉnh truy vấn tìm kiếm tại `backend/facebook_marketplace_crawler.py` trong hàm `search()` (biến `marketplace_url`).
