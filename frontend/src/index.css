@@ -1,0 +1,13 @@
+/** Tailwind entry */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light dark;
+}
+
+html, body, #root { height: 100%; }
+
+/* App layout helpers */
+.container-safe { @apply max-w-3xl mx-auto px-3 sm:px-4; }

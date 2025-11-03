@@ -1,0 +1,19 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+.venv/
+.env
+.cursor
+.pytest_cache
+__pycache__
+insights.db
+.vscode
+**/facebook_state.json
+facebook_state.json
