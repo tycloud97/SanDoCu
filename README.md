@@ -19,21 +19,21 @@ Săn Đồ Cũ giúp bạn thu thập (crawl) bài đăng từ nhiều nguồn (
 
 ```mermaid
 graph LR
-  A1[Facebook Group] --> C1[FB Group Crawler<br/>(Selenium)]
-  A2[Facebook Marketplace] --> C2[FB Marketplace Crawler<br/>(Playwright)]
-  A3[Chợ Tốt] --> C3[Chợ Tốt Crawler<br/>(Requests + BS4)]
+  A1[Facebook Group] --> C1["FB Group Crawler (Selenium)"]
+  A2[Facebook Marketplace] --> C2["FB Marketplace Crawler (Playwright)"]
+  A3["Chợ Tốt"] --> C3["Chợ Tốt Crawler (Requests + BS4)"]
 
   subgraph Backend
-    C1 --> W[UnifiedCSVWriter\n(de-dup by id, add crawl_time)]
+    C1 --> W["UnifiedCSVWriter (de-dup by id, add crawl_time)"]
     C2 --> W
     C3 --> W
-    W --> F1[frontend/public/data/sources/facebook_group.csv]
-    W --> F2[frontend/public/data/sources/facebook_marketplace.csv]
-    W --> F3[frontend/public/data/sources/chotot.csv]
+    W --> F1["frontend/public/data/sources/facebook_group.csv"]
+    W --> F2["frontend/public/data/sources/facebook_marketplace.csv"]
+    W --> F3["frontend/public/data/sources/chotot.csv"]
   end
 
   subgraph Frontend
-    F1 -.-> UI[React UI (PapaParse, Filters, Viewed marks)]
+    F1 -.-> UI["React UI (PapaParse, Filters, Viewed marks)"]
     F2 -.-> UI
     F3 -.-> UI
   end
