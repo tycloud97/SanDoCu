@@ -130,18 +130,6 @@ function normalizeItem(row: any, sourceKey: GroupKey, sourceLabel: string): Item
   };
 }
 
-function slug(s: string) {
-  const base = s
-    .toLowerCase()
-    .normalize("NFD")
-    // Remove combining diacritics (broad browser support)
-    .replace(/[\u0300-\u036f]/g, "");
-  const mapped = base.replace(/[đð]/g, "d");
-  return mapped
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)+/g, "");
-}
-
 function useViewed(ids: string[]) {
   const KEY = "san-do-cu:viewed";
   const [viewed, setViewed] = useState<Record<string, boolean>>({});
