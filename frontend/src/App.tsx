@@ -241,13 +241,23 @@ export default function App() {
       return terms.some((k) => hay.includes(k));
     };
 
-    return items.filter((it) => {
+    const parsed = items.filter((it) => {
       if (selectedGroups.length && !selectedGroups.includes(it.sourceKey)) return false;
       if (!matches(it)) return false;
       if (activeTab === "viewed") return isViewed(it.id);
       if (activeTab === "unviewed") return !isViewed(it.id);
       return true;
     });
+
+    // Sort by crawl_time descending (newest first). Items without crawl_time go last.
+    const ts = (s?: string) => {
+      if (!s) return -Infinity;
+      const t = Date.parse(s);
+      return Number.isFinite(t) ? t : -Infinity;
+    };
+
+    parsed.sort((a, b) => ts(b.crawl_time) - ts(a.crawl_time));
+    return parsed;
   }, [items, terms, activeTab, isViewed, selectedGroups]);
 
   return (
